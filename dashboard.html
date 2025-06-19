@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Dashboard</title>
+  <style>
+    :root {
+      --bg: #f9f4f3;
+      --bg-card: #fff9f8;
+      --text: #3d2326;
+      --accent: #a06a6e;
+      --muted: #a08a8e;
+      --shadow: 0 2px 8px rgba(0,0,0,0.03);
+      --shadow-hover: 0 8px 25px rgba(160, 106, 110, 0.15);
+      --border: #e7dede;
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+    }
+    .dark-mode {
+      --bg: #19171a;
+      --bg-card: #232026;
+      --text: #f9f4f3;
+      --accent: #e7b7c2;
+      --muted: #bbaeb5;
+      --shadow: 0 2px 8px rgba(0,0,0,0.5);
+      --shadow-hover: 0 8px 25px rgba(231, 183, 194, 0.08);
+      --border: #2d2830;
+    }
+    .navbar {
+      background: var(--bg-card);
+      padding: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .nav-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links a {
+      color: var(--accent);
+      text-decoration: none;
+      margin-left: 2rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: var(--text);
+    }
+    .toggle-mode {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      margin-left: 2rem;
+      color: var(--accent);
+      transition: color 0.2s;
+    }
+    .toggle-mode:hover {
+      color: var(--text);
+    }
+    .dashboard {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+      background: var(--bg);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 40px;
+      justify-content: space-between;
+    }
+    .metric {
+      flex: 1;
+      background: var(--bg-card);
+      border-radius: 10px;
+      padding: 32px 24px 24px 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .metric-title {
+      font-size: 1.3rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .metric-unit {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+    .metric-value {
+      font-size: 3rem;
+      font-weight: 400;
+      margin: 10px 0 0 0;
+      letter-spacing: 1px;
+      color: var(--text);
+    }
+    .metric-change {
+      font-size: 1.2rem;
+      color: var(--muted);
+      margin: 0 0 18px 0;
+      display: flex;
+      align-items: center;
+    }
+    .metric-change.up {
+      color: var(--accent);
+    }
+    .metric-change.down {
+      color: var(--muted);
+    }
+    .years {
+      width: 100%;
+      margin-top: 18px;
+    }
+    .year-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 1.05rem;
+    }
+    .year-label {
+      width: 50px;
+      color: var(--muted);
+    }
+    .year-bar {
+      flex: 1;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--border);
+      margin: 0 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .year-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--accent);
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    .year-value {
+      width: 90px;
+      text-align: right;
+      color: var(--text);
+    }
+    .metric-footer {
+      margin-top: 24px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1rem;
+      color: var(--muted);
+    }
+    .footer-link {
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+    .footer-link:hover {
+      color: var(--accent);
+    }
+    .download-icon {
+      font-size: 1.3rem;
+      margin-left: 4px;
+    }
+    @media (max-width: 900px) {
+      .dashboard {
+        flex-direction: column;
+        gap: 24px;
+      }
+    }
+    @media (max-width: 768px) {
+      .nav-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+      .nav-links a {
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-content">
+      <a href="index.html" class="logo">Portfolio Energy</a>
+      <div style="display: flex; align-items: center;">
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="dashboard.html">Dashboard</a>
+          <a href="#">About</a>
+          <a href="#">Contact</a>
+        </div>
+        <button class="toggle-mode" id="toggleMode" title="Toggle light/dark mode">🌙</button>
+      </div>
+    </div>
+  </nav>
+  <div class="dashboard">
+    <!-- Carbon Footprint -->
+    <div class="metric">
+      <div class="metric-title">Managed portfolio carbon footprint <span class="metric-unit">tCO₂e</span></div>
+      <div class="metric-value">45,048</div>
+      <div class="metric-change up">&#8593; 16% <span style="font-size:1rem; color:var(--muted); margin-left:8px;">from 2019</span></div>
+      <div class="years">
+        <div class="year-row"><span class="year-label">2022</span><span class="year-bar"><span class="year-bar-fill" style="width: 80%;"></span></span><span class="year-value">45,048</span></div>
+        <div class="year-row"><span class="year-label">2021</span><span class="year-bar"><span class="year-bar-fill" style="width: 25%;"></span></span><span class="year-value">14,111</span></div>
+        <div class="year-row"><span class="year-label">2020</span><span class="year-bar"><span class="year-bar-fill" style="width: 58%;"></span></span><span class="year-value">32,813</span></div>
+        <div class="year-row"><span class="year-label">2019</span><span class="year-bar"><span class="year-bar-fill" style="width: 68%;"></span></span><span class="year-value">38,673</span></div>
+      </div>
+      <div class="metric-footer">
+        <a href="#" class="footer-link">See full breakdown of carbon footprint <span>&#8594;</span></a>
+      </div>
+    </div>
+    <!-- Energy Intensity -->
+    <div class="metric">
+      <div class="metric-title">Managed portfolio energy intensity <span class="metric-unit">kWh/m²</span></div>
+      <div class="metric-value">123</div>
+      <div class="metric-change down">&#8595; 22% <span style="font-size:1rem; color:var(--muted); margin-left:8px;">from 2019</span></div>
+      <div class="years">
+        <div class="year-row"><span class="year-label">2022</span><span class="year-bar"><span class="year-bar-fill" style="width: 78%;"></span></span><span class="year-value">123</span></div>
+        <div class="year-row"><span class="year-label">2021</span><span class="year-bar"><span class="year-bar-fill" style="width: 81%;"></span></span><span class="year-value">128</span></div>
+        <div class="year-row"><span class="year-label">2020</span><span class="year-bar"><span class="year-bar-fill" style="width: 86%;"></span></span><span class="year-value">135</span></div>
+        <div class="year-row"><span class="year-label">2019</span><span class="year-bar"><span class="year-bar-fill" style="width: 100%;"></span></span><span class="year-value">157</span></div>
+      </div>
+      <div class="metric-footer">
+        <a href="#" class="footer-link">Download the data <span class="download-icon">&#8681;</span></a>
+      </div>
+    </div>
+    <!-- Energy Consumption -->
+    <div class="metric">
+      <div class="metric-title">Managed portfolio energy consumption <span class="metric-unit">kWh</span></div>
+      <div class="metric-value">47,790,662</div>
+      <div class="metric-change down">&#8595; 27% <span style="font-size:1rem; color:var(--muted); margin-left:8px;">from 2019</span></div>
+      <div class="years">
+        <div class="year-row"><span class="year-label">2022</span><span class="year-bar"><span class="year-bar-fill" style="width: 73%;"></span></span><span class="year-value">47,790,662</span></div>
+        <div class="year-row"><span class="year-label">2021</span><span class="year-bar"><span class="year-bar-fill" style="width: 75%;"></span></span><span class="year-value">49,324,077</span></div>
+        <div class="year-row"><span class="year-label">2020</span><span class="year-bar"><span class="year-bar-fill" style="width: 74%;"></span></span><span class="year-value">48,784,205</span></div>
+        <div class="year-row"><span class="year-label">2019</span><span class="year-bar"><span class="year-bar-fill" style="width: 100%;"></span></span><span class="year-value">65,198,706</span></div>
+      </div>
+      <div class="metric-footer">
+        <a href="#" class="footer-link">Download the data <span class="download-icon">&#8681;</span></a>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Light/Dark mode toggle
+    const toggleBtn = document.getElementById('toggleMode');
+    function setMode(dark) {
+      if (dark) {
+        document.body.classList.add('dark-mode');
+        toggleBtn.textContent = '☀️';
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark-mode');
+        toggleBtn.textContent = '🌙';
+        localStorage.setItem('theme', 'light');
+      }
+    }
+    // On load, set theme from localStorage
+    (function() {
+      const theme = localStorage.getItem('theme');
+      setMode(theme === 'dark');
+    })();
+    toggleBtn.addEventListener('click', () => {
+      setMode(!document.body.classList.contains('dark-mode'));
+    });
+  </script>
+</body>
+</html> 

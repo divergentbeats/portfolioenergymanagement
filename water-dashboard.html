@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Usage Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #f9f4f3;
+            --bg-card: #fff9f8;
+            --text: #3d2326;
+            --accent: #a06a6e;
+            --muted: #a08a8e;
+            --shadow: 0 2px 8px rgba(0,0,0,0.03);
+            --shadow-hover: 0 8px 25px rgba(160, 106, 110, 0.15);
+            --border: #e7dede;
+        }
+        .dark-mode {
+            --bg: #19171a;
+            --bg-card: #232026;
+            --text: #f9f4f3;
+            --accent: #e7b7c2;
+            --muted: #bbaeb5;
+            --shadow: 0 2px 8px rgba(0,0,0,0.5);
+            --shadow-hover: 0 8px 25px rgba(231, 183, 194, 0.08);
+            --border: #2d2830;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            background-image: url('data:image/svg+xml;utf8,<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg"><ellipse cx="400" cy="300" rx="350" ry="180" fill="%23e7dede" fill-opacity="0.18"/></svg>');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            transition: background 0.3s, color 0.3s;
+        }
+        .dark-mode body, body.dark-mode {
+            background-image: url('data:image/svg+xml;utf8,<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg"><ellipse cx="400" cy="300" rx="350" ry="180" fill="%232d2830" fill-opacity="0.22"/></svg>');
+        }
+        .navbar {
+            background: var(--bg-card);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+        }
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dashboard-container {
+            max-width: 420px;
+            margin: 2.5rem auto;
+            padding: 0 1rem;
+        }
+        .metric-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 2.5rem 2rem 2rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .water-title {
+            font-size: 1.2rem;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        .water-unit {
+            font-size: 1rem;
+            color: var(--muted);
+            margin-left: 0.5rem;
+        }
+        .water-value {
+            font-size: 3rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        .water-change {
+            color: var(--accent);
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .water-from {
+            color: var(--muted);
+            font-size: 1rem;
+            margin-left: 0.5rem;
+        }
+        .water-bars {
+            margin-bottom: 2rem;
+        }
+        .water-bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.1rem;
+        }
+        .water-bar-label {
+            width: 2.5rem;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+        .water-bar {
+            flex: 1;
+            height: 10px;
+            border-radius: 5px;
+            background: #e7dede;
+            margin: 0 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .water-bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            background: var(--accent);
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .water-bar-value {
+            min-width: 90px;
+            text-align: right;
+            color: var(--text);
+            font-size: 1rem;
+        }
+        .toggle-view {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: background 0.2s;
+            font-size: 1rem;
+        }
+        .toggle-view:hover {
+            background: #8a5c60;
+        }
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: color 0.2s;
+        }
+        .logo:hover {
+            color: var(--text);
+        }
+        @media (max-width: 600px) {
+            .dashboard-container {
+                max-width: 100%;
+                padding: 0 0.5rem;
+            }
+            .metric-card {
+                padding: 1.2rem 0.7rem 1.2rem 0.7rem;
+            }
+            .water-value {
+                font-size: 2rem;
+            }
+        }
+        .dashboard-loader-overlay {
+            position: fixed;
+            z-index: 99999;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+        .dashboard-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .dashboard-dots {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .dashboard-dots .dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent, #a06a6e);
+            opacity: 0.7;
+            animation: dashboard-dot-bounce 1s infinite;
+        }
+        .dashboard-dots .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-dots .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dashboard-dot-bounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.7; }
+            40% { transform: translateY(-18px); opacity: 1; }
+        }
+        .dashboard-loader-text {
+            color: #fff;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            opacity: 0.85;
+        }
+    </style>
+</head>
+<body>
+    <div id="dashboard-loader-overlay" class="dashboard-loader-overlay">
+        <div class="dashboard-loader">
+            <div class="dashboard-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            <div class="dashboard-loader-text">Loading dashboard…</div>
+        </div>
+    </div>
+    <nav class="navbar">
+        <div class="nav-content">
+            <a href="index.html" class="logo">🌱 Portfolio Energy</a>
+            <button class="toggle-view" id="toggleMode">🌙</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="metric-card" id="tableView">
+            <div class="water-title">Managed portfolio water usage <span class="water-unit">kL</span></div>
+            <div class="water-value">1,200,000</div>
+            <div class="water-change">↑ 22% <span class="water-from">from 2019</span></div>
+            <div class="water-bars">
+                <div class="water-bar-row"><span class="water-bar-label">2022</span><div class="water-bar"><div class="water-bar-fill" style="width: 90%;"></div></div><span class="water-bar-value">1,200,000</span></div>
+                <div class="water-bar-row"><span class="water-bar-label">2021</span><div class="water-bar"><div class="water-bar-fill" style="width: 80%;"></div></div><span class="water-bar-value">1,050,000</span></div>
+                <div class="water-bar-row"><span class="water-bar-label">2020</span><div class="water-bar"><div class="water-bar-fill" style="width: 73%;"></div></div><span class="water-bar-value">980,000</span></div>
+                <div class="water-bar-row"><span class="water-bar-label">2019</span><div class="water-bar"><div class="water-bar-fill" style="width: 60%;"></div></div><span class="water-bar-value">880,000</span></div>
+            </div>
+            <button class="toggle-view" id="downloadBtn" style="background:var(--bg-card); color:var(--accent); border:1.5px solid var(--accent); margin-bottom:0.5rem;">Download the data ⬇️</button>
+            <button class="toggle-view" onclick="toggleView()">Switch to Graph View</button>
+        </div>
+        <div id="graphView" style="display:none;">
+            <div class="metric-card">
+                <h2>Water Usage Overview</h2>
+                <div class="chart-container">
+                    <canvas id="waterChart"></canvas>
+                </div>
+            </div>
+            <div class="metric-card">
+                <h2>Monthly Breakdown</h2>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+            <div class="metric-card">
+                <h2>Water Usage Breakdown</h2>
+                <div class="chart-container">
+                    <canvas id="waterPie"></canvas>
+                </div>
+            </div>
+            <button class="toggle-view" onclick="toggleView()">Switch to Table View</button>
+        </div>
+    </div>
+
+    <script>
+        // Toggle view
+        function toggleView() {
+            const table = document.getElementById('tableView');
+            const graph = document.getElementById('graphView');
+            if (table.style.display === 'none') {
+                table.style.display = '';
+                graph.style.display = 'none';
+            } else {
+                table.style.display = 'none';
+                graph.style.display = '';
+            }
+        }
+        // Download CSV
+        document.getElementById('downloadBtn').onclick = function() {
+            const rows = [
+                ['Year', 'Value'],
+                ['2022', '1200000'],
+                ['2021', '1050000'],
+                ['2020', '980000'],
+                ['2019', '880000']
+            ];
+            let csv = rows.map(r => r.join(",")).join("\n");
+            const blob = new Blob([csv], {type: 'text/csv'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'water-usage.csv';
+            a.click();
+        };
+        // Light/Dark mode logic
+        const toggleBtn = document.getElementById('toggleMode');
+        function setMode(dark) {
+            if (dark) {
+                document.body.classList.add('dark-mode');
+                toggleBtn.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                toggleBtn.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+        (function() {
+            const theme = localStorage.getItem('theme');
+            setMode(theme === 'dark');
+        })();
+        toggleBtn.addEventListener('click', () => {
+            setMode(!document.body.classList.contains('dark-mode'));
+        });
+        let currentView = 'bar';
+        const yearlyData = {
+            labels: ['2019', '2020', '2021', '2022'],
+            datasets: [{
+                label: 'Water Usage (kL)',
+                data: [980000, 1100000, 1050000, 1200000],
+                backgroundColor: '#a06a6e',
+                borderColor: '#a06a6e',
+            }]
+        };
+        const monthlyData = {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Water Usage 2022 (kL)',
+                data: [95000, 88000, 92000, 98000, 105000, 115000, 125000, 120000, 110000, 100000, 95000, 92000],
+                backgroundColor: '#a06a6e',
+                borderColor: '#a06a6e',
+            }]
+        };
+        const ctx1 = document.getElementById('waterChart').getContext('2d');
+        const ctx2 = document.getElementById('monthlyChart').getContext('2d');
+        const pieCtx = document.getElementById('waterPie').getContext('2d');
+        const waterChart = new Chart(ctx1, {
+            type: 'bar',
+            data: yearlyData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
+        const monthlyChart = new Chart(ctx2, {
+            type: 'bar',
+            data: monthlyData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
+        const pieData = {
+            labels: ['Buildings', 'Irrigation', 'Cooling', 'Other'],
+            datasets: [{
+                label: 'Breakdown',
+                data: [600000, 300000, 200000, 100000],
+                backgroundColor: ['#a06a6e', '#e7b7c2', '#bbaeb5', '#e7dede'],
+                borderColor: ['#a06a6e', '#e7b7c2', '#bbaeb5', '#e7dede'],
+            }]
+        };
+        const waterPie = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: pieData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: {position: 'bottom'} }
+            }
+        });
+        window.addEventListener('DOMContentLoaded', function () {
+            var loader = document.getElementById('dashboard-loader-overlay');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }, 1800);
+        });
+    </script>
+</body>
+</html> 
